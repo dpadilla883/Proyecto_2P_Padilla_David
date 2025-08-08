@@ -1,0 +1,5 @@
+pkg_chat\cls_mensaje.class
+pkg_chat\cls_encoder_mensaje.class
+pkg_chat\cls_configurator_chat.class
+pkg_chat\cls_chat.class
+pkg_chat\cls_decoder_mensaje.class

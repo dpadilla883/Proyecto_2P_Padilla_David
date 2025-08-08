@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: Nómina API
+  version: 1.0.0
+  description: Servicios REST para gestionar empleados y nóminas.
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.midominio.com/realms/demo/protocol/openid-connect/auth
+          tokenUrl: https://auth.midominio.com/realms/demo/protocol/openid-connect/token
+          scopes: {}
+
+  schemas:
+    Empleado:
+      type: object
+      required: [cedula, nombres, apellidos, fechaIngreso, sueldoBase]
+      properties:
+        empleadoId: { type: integer, format: int64, readOnly: true }
+        cedula: { type: string, example: "1712345678" }
+        nombres: { type: string }
+        apellidos: { type: string }
+        fechaIngreso: { type: string, format: date }
+        sueldoBase: { type: number, format: double }
+
+    Motivo:
+      type: object
+      required: [nombre, tipo]
+      properties:
+        motivoId:   { type: integer, readOnly: true }
+        nombre:     { type: string, example: "Horas extra" }
+        tipo:       { type: string, enum: [I, E] }
+
+    NominaCab:
+      type: object
+      required: [fecha, empleadoId]
+      properties:
+        nominaId:       { type: integer, format: int64, readOnly: true }
+        fecha:          { type: string, format: date }
+        empleadoId:     { type: integer, format: int64 }
+        totalIngresos:  { type: number, format: double, readOnly: true }
+        totalEgresos:   { type: number, format: double, readOnly: true }
+        estado:         { type: string, enum: [BORRADOR, CONTABILIZADO] }
+
+    NominaDet:
+      type: object
+      required: [motivoId, valor]
+      properties:
+        detalleId:  { type: integer, format: int64, readOnly: true }
+        motivoId:   { type: integer }
+        valor:      { type: number, format: double }
+
+paths:
+  /empleados:
+    get:
+      summary: Listar empleados
+      operationId: listEmpleados
+      security: [{ oauth2: [] }]
+      responses:
+        "200":
+          description: OK
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Empleado' } } } }
+    post:
+      summary: Crear empleado
+      operationId: createEmpleado
+      security: [{ oauth2: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/Empleado' } } }
+      responses: { "201": { description: Creado } }
+
+  /motivos:
+    get:
+      summary: Listar motivos
+      operationId: listMotivos
+      security: [{ oauth2: [] }]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Motivo' } } } } }
+    post:
+      summary: Crear motivo
+      operationId: createMotivo
+      security: [{ oauth2: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/Motivo' } } }
+      responses: { "201": { description: Creado } }
+
+  /nominas:
+    post:
+      summary: Crear nómina (cabecera + detalles)
+      operationId: createNomina
+      security: [{ oauth2: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/NominaCab'
+                - type: object
+                  properties:
+                    detalles:
+                      type: array
+                      items: { $ref: '#/components/schemas/NominaDet' }
+      responses: { "201": { description: Creada } }
+
+  /nominas/{id}/contabilizar:
+    post:
+      summary: Enviar a contabilidad (RabbitMQ)
+      operationId: contabilizarNomina
+      security: [{ oauth2: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses: { "202": { description: Publicado en cola } }
+
+  /reportes/nomina:
+    get:
+      summary: Reporte cruzado empleados × motivos
+      operationId: reporteNomina
+      security: [{ oauth2: [] }]
+      parameters:
+        - name: fechaDesde
+          in: query
+          schema: { type: string, format: date }
+        - name: fechaHasta
+          in: query
+          schema: { type: string, format: date }
+      responses: { "200": { description: OK } }

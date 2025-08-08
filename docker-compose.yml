@@ -1,0 +1,59 @@
+
+
+
+services:
+  # ──────────────────────── BBDD ────────────────────────
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql2022
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: davs321.
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  # ─────────────────────── RabbitMQ ─────────────────────
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbit
+    ports:
+      - "5672:5672"      # AMQP
+      - "15672:15672"    # UI
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+
+  # ─────────────────────── Keycloak ─────────────────────
+  #keycloak:
+   # image: quay.io/keycloak/keycloak:22.0
+    #container_name: keycloak
+    #command: ["start-dev","--http-port=8081"]
+    #environment:
+     # KEYCLOAK_ADMIN: admin
+     # KEYCLOAK_ADMIN_PASSWORD: admin
+    #ports:
+     # - "8081:8081"
+    #volumes:
+     # - keycloak_data:/opt/keycloak/data
+
+  # ─────────────────────── Nomina API ───────────────────
+  nomina:
+    build: ./nomina-api          # o image: nomina:latest
+    container_name: nomina
+    depends_on:
+      - rabbit
+      - db
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://db:1433;databaseName=Nomina
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: davs321.
+    ports:
+      - "8085:8787"              # expones el puerto de la app
+
+volumes:
+  mssql_data:
+  rabbit_data:
+  keycloak_data:

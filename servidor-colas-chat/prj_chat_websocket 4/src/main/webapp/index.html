@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CHAT DISTRIBUIDAS</title>
+</head>
+<body>
+  <h2>CHAT DISTRIBUIDAS</h2>
+
+  <div id="login">
+    Nombre: <input id="txtNombre"> <button id="btnLogin">Login</button>
+  </div>
+
+  <div id="chat" style="display:none">
+    Para: <select id="selPara"><option value="ALL">(Todos)</option></select><br><br>
+    Mensaje:<br>
+    <textarea id="txtMensaje" rows="3" cols="40"></textarea><br>
+    <button id="btnEnviar">Enviar</button><br><br>
+    <div id="areaChat" style="border:1px solid #999;width:400px;height:200px;overflow:auto"></div>
+  </div>
+
+  <!-- 👇 AHORA el script se carga cuando el DOM ya existe -->
+  <script src="java_script/codigo.js"></script>
+</body>
+</html>

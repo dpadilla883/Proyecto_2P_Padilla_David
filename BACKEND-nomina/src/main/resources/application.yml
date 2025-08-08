@@ -1,0 +1,76 @@
+
+
+
+###############################################################################
+# CONFIGURACIÓN COMÚN
+###############################################################################
+spring:
+  application:
+    name: nomina-api
+
+  profiles:
+    active: dev                    # ← arrancará con “dev” si no indicas otro
+
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=NominaDB2;encrypt=false
+    username: sa
+    password: davs321.
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      maximum-pool-size: 8
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      #ddl-auto: update
+      dialect: org.hibernate.dialect.SQLServerDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GOOGLE_CLIENT_ID}
+client-secret: ${GOOGLE_CLIENT_SECRET}
+
+           
+
+            scope: user:email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+client-secret: ${GOOGLE_CLIENT_SECRET}
+
+            
+
+            scope: email, profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri:        https://github.com/login/oauth/access_token
+            user-info-uri:    https://api.github.com/user
+            user-name-attribute: id
+
+springdoc:
+  api-docs.path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /api-docs
+    disable-swagger-default-url: true
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+
+jwt:
+  secret: YWxndW5hLXRyZXMtbGxhdmUtbGUtcmVkLXNlY3JldC1zYWZlLXNlY3VyaXR6   # ≥32 bytes base64
+  expiration: 3600           # segundos
+
+server:
+  port: 8083

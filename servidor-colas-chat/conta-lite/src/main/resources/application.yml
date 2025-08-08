@@ -1,0 +1,19 @@
+server:
+  port: 8084              # Swagger en http://localhost:8084/swagger-ui.html
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:conta;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest

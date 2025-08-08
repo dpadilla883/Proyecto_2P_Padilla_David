@@ -1,0 +1,47 @@
+
+-- Crea la base de datos
+CREATE DATABASE IF NOT EXISTS NominaDB2;
+USE NominaDB2;
+
+-- Tabla de Empleados
+CREATE TABLE empleado (
+    empleado_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    cedula        VARCHAR(20) NOT NULL UNIQUE,
+    nombres       VARCHAR(100) NOT NULL,
+    apellidos     VARCHAR(100) NOT NULL,
+    fecha_ingreso DATE NOT NULL,
+    sueldo_base   DOUBLE NOT NULL
+);
+
+-- Tabla de Motivos (ingresos/egresos)
+CREATE TABLE motivo (
+    motivo_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre    VARCHAR(100) NOT NULL,
+    tipo      ENUM('I', 'E') NOT NULL    -- 'I' para ingreso, 'E' para egreso
+);
+
+-- Tabla de Cabecera de Nómina
+CREATE TABLE nomina_cab (
+    nomina_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fecha          DATE NOT NULL,
+    empleado_id    BIGINT NOT NULL,
+    total_ingresos DOUBLE DEFAULT 0,
+    total_egresos  DOUBLE DEFAULT 0,
+    estado         ENUM('BORRADOR', 'CONTABILIZADO') DEFAULT 'BORRADOR',
+    FOREIGN KEY (empleado_id) REFERENCES empleado(empleado_id)
+);
+
+-- Tabla de Detalle de Nómina
+CREATE TABLE nomina_det (
+    detalle_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nomina_id   BIGINT NOT NULL,
+    motivo_id   BIGINT NOT NULL,
+    valor       DOUBLE NOT NULL,
+    FOREIGN KEY (nomina_id) REFERENCES nomina_cab(nomina_id),
+    FOREIGN KEY (motivo_id) REFERENCES motivo(motivo_id)
+);
+
+-- Índices recomendados para búsquedas frecuentes
+CREATE INDEX idx_empleado_cedula ON empleado(cedula);
+CREATE INDEX idx_nomina_fecha ON nomina_cab(fecha);
+CREATE INDEX idx_motivo_tipo ON motivo(tipo);
